@@ -38,8 +38,8 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    
    **Service 1 - Backend:**
    - **Root Directory**: `backend`
-   - **Build Command**: Leave empty (uses Dockerfile)
-   - **Start Command**: Leave empty (uses Dockerfile)
+   - **Build Command**: Leave empty (auto-detects Node.js)
+   - **Start Command**: `./start.sh` (or leave empty)
    - **Environment Variables**:
      - `NODE_ENV=production`
      - `PORT=5000`
@@ -53,9 +53,8 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
      - `PORT=3000`
    
 6. **Configuration files are already included**:
-   - `start.sh` - Start script for frontend service
+   - `start.sh` - Start script for both frontend and backend services
    - `build.sh` - Build script for frontend service
-   - `railway.json` - Railway configuration for backend
    - `serve` package already added to frontend dependencies
 
 ### Option B: Separate Backend Deployment
