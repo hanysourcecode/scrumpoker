@@ -38,22 +38,23 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    
    **Service 1 - Backend:**
    - **Root Directory**: `backend`
-   - **Build Command**: `npm ci` (or leave empty - Railway will auto-detect)
-   - **Start Command**: `npm start` (or leave empty - uses railway.json)
+   - **Build Command**: Leave empty (uses Dockerfile)
+   - **Start Command**: Leave empty (uses Dockerfile)
    - **Environment Variables**:
      - `NODE_ENV=production`
      - `PORT=5000`
    
    **Service 2 - Frontend:**
    - **Root Directory**: `frontend`
-   - **Build Command**: `npm ci && npm run build` (or leave empty - uses nixpacks.toml)
-   - **Start Command**: `npx serve -s build -l $PORT` (or leave empty - uses railway.json)
+   - **Build Command**: Leave empty (uses Dockerfile)
+   - **Start Command**: Leave empty (uses Dockerfile)
    - **Environment Variables**:
      - `REACT_APP_API_URL=https://your-backend-service.railway.app`
    
 6. **Configuration files are already included**:
+   - `Dockerfile` - Docker configuration for both services
    - `railway.json` - Railway-specific configuration
-   - `nixpacks.toml` - Build and deployment configuration
+   - `.dockerignore` - Optimized Docker builds
    - `serve` package already added to frontend dependencies
 
 ### Option B: Separate Backend Deployment
