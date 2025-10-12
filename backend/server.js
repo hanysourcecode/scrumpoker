@@ -8,7 +8,12 @@ const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
     origin: process.env.NODE_ENV === 'production' ? 
-      [process.env.FRONTEND_URL, "https://scrum-poker-app.vercel.app"] : 
+      [
+        process.env.FRONTEND_URL, 
+        "https://scrum-poker-app.netlify.app",
+        "https://*.github.io",
+        "https://*.surge.sh"
+      ] : 
       "http://localhost:3000",
     methods: ["GET", "POST"]
   }
