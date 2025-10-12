@@ -252,7 +252,25 @@ function RoomRoute() {
 function App() {
   const navigate = useNavigate();
 
-  const createRoom = async (roomName, creatorOnlyReveal = false, requireApproval = false, isPublic = true, creatorOnlyStory = false) => {
+  // const createRoom = async (roomName, creatorOnlyReveal = false, requireApproval = false, isPublic = true, creatorOnlyStory = false) => {
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/api/rooms`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ name: roomName, creatorOnlyReveal, requireApproval, isPublic, creatorOnlyStory }),
+  //     });
+  //     const data = await response.json();
+  //     console.log('API response:', data);
+  //     return data.id;
+  //   } catch (error) {
+  //     console.error('Error creating room:', error);
+  //     throw error;
+  //   }
+  // };
+
+  const handleCreateRoom = async (roomName, creatorOnlyReveal = false, requireApproval = false, isPublic = true, creatorOnlyStory = false) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/rooms`, {
         method: 'POST',
@@ -263,16 +281,7 @@ function App() {
       });
       const data = await response.json();
       console.log('API response:', data);
-      return data.id;
-    } catch (error) {
-      console.error('Error creating room:', error);
-      throw error;
-    }
-  };
-
-  const handleCreateRoom = async (roomName, creatorOnlyReveal = false, requireApproval = false, isPublic = true, creatorOnlyStory = false) => {
-    try {
-      const roomId = await createRoom(roomName, creatorOnlyReveal, requireApproval, isPublic, creatorOnlyStory);
+      const roomId = data.id;
       console.log('Created room with ID:', roomId);
       if (roomId) {
         navigate(`/room/${roomId}`);

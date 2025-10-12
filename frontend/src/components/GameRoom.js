@@ -10,7 +10,7 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
 
   useEffect(() => {
     setIsObserver(user?.isObserver || false);
-  }, [room, user]);
+  }, [user]);
 
   useEffect(() => {
     // Clear selected vote when votes are reset (room.votes becomes empty)
@@ -30,7 +30,7 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
         setSelectedVote(null);
       }
     }
-  }, [room?.votes, user?.name, room?.showVotes]);
+  }, [room?.votes, user?.name, room?.showVotes, selectedVote]);
 
   const handleVote = (vote) => {
     if (isObserver || room?.showVotes) return;
@@ -72,10 +72,10 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
 
 
 
-  const getVotedUsers = () => {
-    if (!room?.votes) return [];
-    return Object.keys(room.votes);
-  };
+  // const getVotedUsers = () => {
+  //   if (!room?.votes) return [];
+  //   return Object.keys(room.votes);
+  // };
 
   const getVoteDistribution = () => {
     if (!room?.votes || !room?.showVotes) return {};
@@ -91,7 +91,7 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
     if (!room?.votes || !room?.showVotes) return [];
     
     return Object.entries(room.votes)
-      .filter(([userName, vote]) => vote == voteValue)
+      .filter(([userName, vote]) => vote === voteValue)
       .map(([userName]) => userName);
   };
 
@@ -121,22 +121,22 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
     return false; // Only creator can reset if enabled
   };
 
-  const copyRoomLink = async () => {
-    const roomUrl = `${window.location.origin}/room/${room?.id}`;
-    try {
-      await navigator.clipboard.writeText(roomUrl);
-      alert('Room link copied to clipboard!');
-    } catch (err) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = roomUrl;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      alert('Room link copied to clipboard!');
-    }
-  };
+  // const copyRoomLink = async () => {
+  //   const roomUrl = `${window.location.origin}/room/${room?.id}`;
+  //   try {
+  //     await navigator.clipboard.writeText(roomUrl);
+  //     alert('Room link copied to clipboard!');
+  //   } catch (err) {
+  //     // Fallback for older browsers
+  //     const textArea = document.createElement('textarea');
+  //     textArea.value = roomUrl;
+  //     document.body.appendChild(textArea);
+  //     textArea.select();
+  //     document.execCommand('copy');
+  //     document.body.removeChild(textArea);
+  //     alert('Room link copied to clipboard!');
+  //   }
+  // };
 
   const handleApproveJoinRequest = (userId) => {
     socket.emit('approve-join-request', { userId });

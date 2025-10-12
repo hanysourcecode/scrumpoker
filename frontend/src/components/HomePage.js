@@ -6,10 +6,10 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 const HomePage = ({ onJoinRoom, onCreateRoom }) => {
   const [roomId, setRoomId] = useState('');
   const [newRoomName, setNewRoomName] = useState('');
-  const [creatorOnlyReveal, setCreatorOnlyReveal] = useState(true);
+  const [creatorOnlyReveal] = useState(true);
   const [requireApproval, setRequireApproval] = useState(false);
   const [isPublic, setIsPublic] = useState(true);
-  const [creatorOnlyStory, setCreatorOnlyStory] = useState(true);
+  const [creatorOnlyStory] = useState(true);
   const [availableRooms, setAvailableRooms] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
