@@ -46,15 +46,17 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    
    **Service 2 - Frontend:**
    - **Root Directory**: `frontend`
-   - **Build Command**: `./build.sh` (or leave empty)
-   - **Start Command**: `./start.sh` (or leave empty)
+   - **Build Command**: Leave empty (uses nixpacks.toml)
+   - **Start Command**: Leave empty (uses nixpacks.toml)
    - **Environment Variables**:
      - `REACT_APP_API_URL=https://your-backend-service.railway.app`
      - `PORT=3000`
    
 6. **Configuration files are already included**:
-   - `start.sh` - Start script for both frontend and backend services
-   - `build.sh` - Build script for frontend service
+   - `nixpacks.toml` - Railway's preferred build configuration
+   - `Procfile` - Alternative deployment method
+   - `start.sh` - Shell script fallback
+   - `build.sh` - Build script fallback
    - `serve` package already added to frontend dependencies
 
 ### Option B: Separate Backend Deployment
