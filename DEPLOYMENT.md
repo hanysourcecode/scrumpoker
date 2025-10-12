@@ -46,17 +46,16 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    
    **Service 2 - Frontend:**
    - **Root Directory**: `frontend`
-   - **Build Command**: Leave empty (uses nixpacks.toml)
-   - **Start Command**: Leave empty (uses nixpacks.toml)
+   - **Build Command**: Leave empty (uses Dockerfile)
+   - **Start Command**: Leave empty (uses Dockerfile)
    - **Environment Variables**:
      - `REACT_APP_API_URL=https://your-backend-service.railway.app`
      - `PORT=3000`
    
 6. **Configuration files are already included**:
-   - `nixpacks.toml` - Railway's preferred build configuration
-   - `Procfile` - Alternative deployment method
-   - `start.sh` - Shell script fallback
-   - `build.sh` - Build script fallback
+   - `Dockerfile` - Docker configuration for frontend
+   - `railway.json` - Railway configuration for Docker
+   - `start.sh` - Start script for backend service
    - `serve` package already added to frontend dependencies
 
 ### Option B: Separate Backend Deployment
@@ -181,10 +180,10 @@ After both deployments:
    - Redeploy after changing environment variables
 
 4. **Railway Build Issues**:
-   - If you get "Script start.sh not found" error, ensure start.sh is in the frontend directory and is executable
-   - If Railpack can't determine how to build, set explicit commands: `./build.sh` and `./start.sh`
+   - If you get "Script start.sh not found" error, Railway will now use Dockerfile instead
+   - If Railpack can't determine how to build, Dockerfile provides explicit build steps
    - Make sure PORT environment variable is set correctly
-   - Ensure all scripts have execute permissions (chmod +x)
+   - Docker approach is more reliable than shell scripts
 
 ## 📊 Free Tier Limits
 
