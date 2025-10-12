@@ -46,16 +46,16 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    
    **Service 2 - Frontend:**
    - **Root Directory**: `frontend`
-   - **Build Command**: `npm run railway:build` (or leave empty)
-   - **Start Command**: `npm run railway:start` (or leave empty)
+   - **Build Command**: `./build.sh` (or leave empty)
+   - **Start Command**: `./start.sh` (or leave empty)
    - **Environment Variables**:
      - `REACT_APP_API_URL=https://your-backend-service.railway.app`
      - `PORT=3000`
    
 6. **Configuration files are already included**:
-   - `Dockerfile` - Docker configuration for both services
-   - `railway.json` - Railway-specific configuration
-   - `.dockerignore` - Optimized Docker builds
+   - `start.sh` - Start script for frontend service
+   - `build.sh` - Build script for frontend service
+   - `railway.json` - Railway configuration for backend
    - `serve` package already added to frontend dependencies
 
 ### Option B: Separate Backend Deployment
@@ -180,11 +180,10 @@ After both deployments:
    - Redeploy after changing environment variables
 
 4. **Railway Build Issues**:
-   - If you get "Script start.sh not found" error, try setting explicit build/start commands in Railway dashboard
-   - If Railpack can't determine how to build, use the npm scripts: `npm run railway:build` and `npm run railway:start`
-   - If Docker build fails, check that all dependencies are in package.json
+   - If you get "Script start.sh not found" error, ensure start.sh is in the frontend directory and is executable
+   - If Railpack can't determine how to build, set explicit commands: `./build.sh` and `./start.sh`
    - Make sure PORT environment variable is set correctly
-   - Alternative: Try using the Procfile or nixpacks.toml configuration
+   - Ensure all scripts have execute permissions (chmod +x)
 
 ## 📊 Free Tier Limits
 
