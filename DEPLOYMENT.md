@@ -57,9 +57,9 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
 3. **Click "New site from Git"**
 4. **Choose GitHub and select your repository**
 5. **Configure the deployment**:
-   - **Base directory**: `frontend`
-   - **Build command**: `npm run build`
-   - **Publish directory**: `frontend/build`
+   - **Base directory**: `frontend` (or leave empty if using netlify.toml)
+   - **Build command**: `cd frontend && npm install && npm run build` (or leave empty if using netlify.toml)
+   - **Publish directory**: `frontend/build` (or leave empty if using netlify.toml)
 6. **Add Environment Variables**:
    - `REACT_APP_API_URL` = `https://your-backend-url.railway.app`
 7. **Click "Deploy site"**
@@ -190,6 +190,12 @@ After both deployments:
    - If Railpack can't determine how to build, package.json provides explicit scripts
    - Make sure PORT environment variable is set correctly
    - Package.json approach is Railway's most reliable method
+
+5. **Netlify Build Issues**:
+   - If you get "No url found for submodule" error, use the netlify.toml configuration
+   - Make sure to set the correct base directory as `frontend`
+   - Use the build command: `cd frontend && npm install && npm run build`
+   - Ensure REACT_APP_API_URL environment variable is set correctly
 
 ## 📊 Free Tier Limits
 
