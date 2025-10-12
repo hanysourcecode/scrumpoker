@@ -10,6 +10,10 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
 
 ## 🎯 Deployment Strategy
 
+### Option 1: All-in-One Railway (Recommended for Simplicity)
+- **Frontend + Backend**: Railway (Full-stack deployment)
+
+### Option 2: Separate Services
 - **Frontend**: Netlify, GitHub Pages, or Surge.sh (React app)
 - **Backend**: Railway or Render (Node.js + Socket.IO)
 
@@ -22,9 +26,41 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    git push origin main
    ```
 
-## 🖥️ Step 2: Deploy Backend (Railway)
+## 🚀 Step 2: Deploy to Railway
 
-### Option A: Railway (Recommended)
+### Option A: All-in-One Railway Deployment (Recommended)
+
+1. **Go to [Railway.app](https://railway.app)**
+2. **Sign up with GitHub**
+3. **Click "New Project" → "Deploy from GitHub repo"**
+4. **Select your repository**
+5. **Add Two Services**:
+   
+   **Service 1 - Backend:**
+   - **Root Directory**: `backend`
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+   - **Environment Variables**:
+     - `NODE_ENV=production`
+     - `PORT=5000`
+   
+   **Service 2 - Frontend:**
+   - **Root Directory**: `frontend`
+   - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npx serve -s build -l 3000`
+   - **Environment Variables**:
+     - `REACT_APP_API_URL=https://your-backend-service.railway.app`
+   
+6. **Install serve package** (add to frontend/package.json):
+   ```json
+   "dependencies": {
+     "serve": "^14.2.1"
+   }
+   ```
+
+### Option B: Separate Backend Deployment
+
+If you prefer to deploy backend separately:
 
 1. **Go to [Railway.app](https://railway.app)**
 2. **Sign up with GitHub**
@@ -36,22 +72,7 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    - **Start Command**: `npm start`
 6. **Add Environment Variables**:
    - `NODE_ENV=production`
-   - `FRONTEND_URL=https://your-frontend-url.vercel.app` (update after frontend deployment)
-
-### Option B: Render
-
-1. **Go to [Render.com](https://render.com)**
-2. **Sign up with GitHub**
-3. **Click "New" → "Web Service"**
-4. **Connect your repository**
-5. **Configure**:
-   - **Root Directory**: `backend`
-   - **Build Command**: `npm install`
-   - **Start Command**: `npm start`
-   - **Environment**: `Node`
-6. **Add Environment Variables**:
-   - `NODE_ENV=production`
-   - `FRONTEND_URL=https://your-frontend-url.vercel.app`
+   - `FRONTEND_URL=https://your-frontend-url.netlify.app`
 
 ## 🌐 Step 3: Deploy Frontend
 
@@ -194,6 +215,17 @@ Your Scrum Poker app should now be live and accessible to anyone on the internet
 **Example URLs**:
 - Frontend: `https://scrum-poker-app.netlify.app` or `https://username.github.io/scrum-poker`
 - Backend: `https://scrum-poker-backend.railway.app`
+
+## 💰 Cost Breakdown
+
+### Option 1: All-in-One Railway (Recommended)
+- **Railway**: $0/month (free $5 credit covers both services)
+- **Total**: **Completely free!**
+
+### Option 2: Separate Services
+- **Frontend**: $0/month (Netlify/GitHub Pages/Surge.sh)
+- **Backend**: $0/month (Railway free credit)
+- **Total**: **Completely free!**
 
 ## 🔄 Updates
 
