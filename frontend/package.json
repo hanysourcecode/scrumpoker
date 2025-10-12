@@ -22,8 +22,7 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "serve": "serve -s build -l 3000",
-    "dev": "react-scripts start",
-    "postinstall": "npm run build && npm install -g serve"
+    "dev": "react-scripts start"
   },
   "eslintConfig": {
     "extends": [
