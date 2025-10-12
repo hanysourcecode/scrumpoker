@@ -50,6 +50,7 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    - **Start Command**: Leave empty (uses Dockerfile)
    - **Environment Variables**:
      - `REACT_APP_API_URL=https://your-backend-service.railway.app`
+     - `PORT=3000`
    
 6. **Configuration files are already included**:
    - `Dockerfile` - Docker configuration for both services
@@ -177,6 +178,11 @@ After both deployments:
 3. **Environment Variables**:
    - Make sure all environment variables are set
    - Redeploy after changing environment variables
+
+4. **Railway Build Issues**:
+   - If you get "Script start.sh not found" error, ensure Dockerfile is in the root directory
+   - If Docker build fails, check that all dependencies are in package.json
+   - Make sure PORT environment variable is set correctly
 
 ## 📊 Free Tier Limits
 
