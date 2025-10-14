@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import DarkModeToggle from './DarkModeToggle';
 
 const UserNamePrompt = ({ onSubmit, onCancel }) => {
   const [userName, setUserName] = useState('');
@@ -20,7 +21,10 @@ const UserNamePrompt = ({ onSubmit, onCancel }) => {
 
 
   return (
-    <div className="container" style={{ textAlign: 'center', padding: '50px' }}>
+    <div className="container" style={{ textAlign: 'center', padding: '50px', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: '20px', right: '20px' }}>
+        <DarkModeToggle />
+      </div>
       <div style={{ maxWidth: '400px', margin: '0 auto' }}>
         <h2>Join Room</h2>
         <p style={{ color: '#666', marginBottom: '30px' }}>

@@ -30,9 +30,31 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    git push origin main
    ```
 
-## 🚀 Step 2: Deploy Backend to Railway
+## 🚀 Step 2: Deploy to Railway
 
-### Option A: Backend Only (Recommended for Netlify Frontend)
+### Option A: Full-Stack Deployment (Recommended)
+
+Deploy both frontend and backend together using the Docker container:
+
+1. **Go to [Railway.app](https://railway.app)**
+2. **Sign up with GitHub**
+3. **Click "New Project" → "Deploy from GitHub repo"**
+4. **Select your repository**
+5. **Railway will automatically detect the Dockerfile**
+6. **Configure Environment Variables**:
+   - `NODE_ENV=production`
+   - `PORT=5000` (Railway will set this automatically)
+7. **Deploy**: Railway will build and deploy automatically
+8. **Get your app URL**: Railway will provide a URL like `https://your-app-name.railway.app`
+
+**Benefits of this approach:**
+- ✅ Single deployment
+- ✅ No CORS issues
+- ✅ Automatic HTTPS
+- ✅ Custom domain support
+- ✅ Built-in monitoring
+
+### Option B: Backend Only (For separate frontend deployment)
 
 1. **Go to [Railway.app](https://railway.app)**
 2. **Sign up with GitHub**

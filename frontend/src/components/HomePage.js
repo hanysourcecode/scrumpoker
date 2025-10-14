@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import DarkModeToggle from './DarkModeToggle';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -60,7 +61,10 @@ const HomePage = ({ onJoinRoom, onCreateRoom }) => {
 
   return (
     <div className="container">
-      <div className="header">
+      <div className="header" style={{ position: 'relative' }}>
+        <div style={{ position: 'absolute', top: 0, right: 0 }}>
+          <DarkModeToggle />
+        </div>
         <h1>🎯 Scrum Poker</h1>
         <p>Estimate user stories with your team in real-time</p>
       </div>

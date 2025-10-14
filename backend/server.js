@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -21,6 +22,9 @@ const io = socketIo(server, {
 
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -218,6 +222,11 @@ app.post('/api/rooms', (req, res) => {
   room.setRequireApproval(requireApproval);
   rooms.set(roomId, room);
   res.json({ id: roomId, name: room.name, creatorOnlyReveal: room.creatorOnlyReveal, requireApproval: room.requireApproval, isPublic: room.isPublic, creatorOnlyStory: room.creatorOnlyStory });
+});
+
+// Catch-all handler: send back React's index.html file for client-side routing
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Socket.io connection handling
@@ -498,6 +507,38 @@ io.on('connection', (socket) => {
         joinRequests: room.getJoinRequests()
       });
     }
+  });
+
+  // Handle end session (room creator only)
+  socket.on('end-session', () => {
+    const userData = users.get(socket.id);
+    if (!userData) return;
+    
+    const room = rooms.get(userData.roomId);
+    if (!room || room.creatorId !== socket.id) {
+      socket.emit('error', { message: 'Only the room creator can end the session' });
+      return;
+    }
+
+    // Notify all users in the room that the session has ended
+    io.to(userData.roomId).emit('session-ended', {
+      message: 'The session has been ended by the room creator'
+    });
+
+    // Remove all users from the room and clean up
+    const roomUsers = Array.from(room.users.keys());
+    roomUsers.forEach(userId => {
+      const userSocket = Array.from(io.sockets.sockets.values())
+        .find(s => s.id === userId);
+      if (userSocket) {
+        userSocket.leave(userData.roomId);
+        users.delete(userId);
+      }
+    });
+
+    // Delete the room
+    rooms.delete(userData.roomId);
+    console.log('Session ended and room deleted:', userData.roomId);
   });
 
   socket.on('reject-join-request', (data) => {

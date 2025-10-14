@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DarkModeToggle from './DarkModeToggle';
 
 const FIBONACCI_SEQUENCE = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, '?'];
 
@@ -152,13 +153,21 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
     }
   };
 
+  const handleEndSession = () => {
+    if (socket && user?.id === room?.creatorId) {
+      if (window.confirm('Are you sure you want to end the session? This will disconnect all users from the room.')) {
+        socket.emit('end-session');
+      }
+    }
+  };
+
 
   // Debug: Log room data
   console.log('GameRoom - room data:', room);
   
   return (
     <div className="container">
-      <div className="game-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '10px', marginBottom: '20px' }}>
+      <div className="game-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px', borderRadius: '10px', marginBottom: '20px' }}>
         <div style={{ flex: 1, minWidth: 0, marginRight: '15px' }}>
           <div style={{ fontSize: '1.8rem', fontWeight: 'bold', margin: 0, marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#333' }}>
             {room?.name || 'Room Title'}
@@ -168,9 +177,16 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
           </div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <button onClick={onLeaveRoom} className="btn btn-danger" style={{ width: 'auto' }}>
-            Leave
-          </button>
+          <DarkModeToggle />
+          {user?.id === room?.creatorId ? (
+            <button onClick={handleEndSession} className="btn btn-danger" style={{ width: 'auto' }}>
+              End Session
+            </button>
+          ) : (
+            <button onClick={onLeaveRoom} className="btn btn-danger" style={{ width: 'auto' }}>
+              Leave
+            </button>
+          )}
         </div>
       </div>
 
@@ -266,7 +282,7 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
       )}
 
       {room?.currentStory && (
-        <div style={{ textAlign: 'center', padding: '20px', background: '#f8f9fa', borderRadius: '10px', marginBottom: '20px' }}>
+        <div className="story-display" style={{ textAlign: 'center', padding: '20px', borderRadius: '10px', marginBottom: '20px' }}>
           <p style={{ fontSize: '1.1rem', fontWeight: '500', margin: 0 }}>
             {room.currentStory}
           </p>
@@ -314,8 +330,8 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
       )}
 
       {!isObserver && !room?.showVotes && !room?.currentStory && (
-        <div style={{ textAlign: 'center', padding: '20px', background: '#f8f9fa', borderRadius: '10px', marginBottom: '20px' }}>
-          <p style={{ color: '#666', fontStyle: 'italic' }}>
+        <div className="waiting-message" style={{ textAlign: 'center', padding: '20px', borderRadius: '10px', marginBottom: '20px' }}>
+          <p style={{ fontStyle: 'italic' }}>
             Waiting for the room creator to start the first round...
           </p>
         </div>
@@ -323,7 +339,7 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
 
       {/* Vote Distribution Graph */}
       {room?.showVotes && Object.keys(getVoteDistribution()).length > 0 && (
-        <div style={{ marginBottom: '20px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '10px' }}>
+        <div className="vote-distribution" style={{ marginBottom: '20px', padding: '20px', borderRadius: '10px' }}>
           <h3 style={{ marginTop: 0, marginBottom: '15px', textAlign: 'center' }}>Vote Distribution</h3>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -433,8 +449,8 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
       )}
 
       {isObserver && (
-        <div style={{ textAlign: 'center', padding: '20px', background: '#f8f9fa', borderRadius: '10px', marginBottom: '20px' }}>
-          <p style={{ color: '#666', fontStyle: 'italic' }}>
+        <div className="observer-message" style={{ textAlign: 'center', padding: '20px', borderRadius: '10px', marginBottom: '20px' }}>
+          <p style={{ fontStyle: 'italic' }}>
             You are in observer mode. You can watch the voting but cannot participate.
           </p>
         </div>
@@ -477,20 +493,18 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
 
       {/* New Story Popup */}
       {showNewStoryPopup && (
-        <div style={{
+        <div className="popup-overlay" style={{
           position: 'fixed',
           top: 0,
           left: 0,
           right: 0,
           bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           zIndex: 1000
         }}>
-          <div style={{
-            backgroundColor: 'white',
+          <div className="popup-content" style={{
             padding: '30px',
             borderRadius: '8px',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
@@ -500,7 +514,7 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
             <h3 style={{ marginTop: 0, marginBottom: '20px', textAlign: 'center' }}>
               New Round
             </h3>
-            <p style={{ color: '#666', marginBottom: '20px', textAlign: 'center' }}>
+            <p style={{ marginBottom: '20px', textAlign: 'center' }}>
               Enter a new story name for the next round:
             </p>
             

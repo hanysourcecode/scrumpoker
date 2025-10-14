@@ -4,6 +4,7 @@ import './App.css';
 import HomePage from './components/HomePage';
 import GameRoom from './components/GameRoom';
 import UserNamePrompt from './components/UserNamePrompt';
+import { DarkModeProvider } from './contexts/DarkModeContext';
 import { io } from 'socket.io-client';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -167,6 +168,11 @@ function RoomRoute() {
       }));
     });
 
+    newSocket.on('session-ended', (data) => {
+      alert(data.message);
+      navigate('/');
+    });
+
     setSocket(newSocket);
     console.log('Emitting join-room event with:', { roomId, userName, isObserver });
     newSocket.emit('join-room', { roomId, userName, isObserver });
@@ -311,12 +317,14 @@ function App() {
 // Root component with Router
 function AppWithRouter() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/room/:roomId" element={<RoomRoute />} />
-      </Routes>
-    </Router>
+    <DarkModeProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<App />} />
+          <Route path="/room/:roomId" element={<RoomRoute />} />
+        </Routes>
+      </Router>
+    </DarkModeProvider>
   );
 }
 
