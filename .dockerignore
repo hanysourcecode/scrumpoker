@@ -34,10 +34,10 @@ Thumbs.db
 Dockerfile*
 .dockerignore
 
-# Documentation
-README.md
+# Documentation (keep essential ones)
 DEPLOYMENT.md
-*.md
+RAILWAY_DEPLOYMENT.md
+DOCKER.md
 
 # Other
 coverage/
