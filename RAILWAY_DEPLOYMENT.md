@@ -30,9 +30,10 @@ Make sure your code is pushed to GitHub with the following files:
    - Choose your scrum-poker repository
 
 3. **Configure Deployment**
-   - Railway will automatically detect your `Dockerfile`
+   - Railway will automatically detect your `Dockerfile.railway`
    - The `railway.json` file will configure the deployment settings
    - Railway will assign a random port (use `PORT` environment variable)
+   - The Railway-specific Dockerfile includes debug output to help troubleshoot build issues
 
 4. **Set Environment Variables**
    In the Railway dashboard, go to Variables tab and add:

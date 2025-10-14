@@ -1,17 +1,24 @@
-# Multi-stage Dockerfile for Scrum Poker App
+# Railway-optimized Dockerfile for Scrum Poker App
+# This version is specifically designed to work reliably on Railway
+
 # Stage 1: Build the frontend React app
 FROM node:20-alpine AS frontend-builder
 
+# Set working directory
 WORKDIR /app
 
-# Copy entire project structure
-COPY . .
-
-# Change to frontend directory
-WORKDIR /app/frontend
+# Copy package files first for better caching
+COPY frontend/package*.json ./frontend/
 
 # Install frontend dependencies
+WORKDIR /app/frontend
 RUN npm ci
+
+# Copy all frontend source files
+COPY frontend/ ./
+
+# Verify files are present (debug step)
+RUN ls -la public/ && echo "Files in public directory:" && ls -la public/
 
 # Build the frontend for production
 RUN npm run build
@@ -40,9 +47,5 @@ RUN chmod +x start-railway.sh
 # Expose port (Railway will set PORT environment variable)
 EXPOSE $PORT
 
-# Health check (Railway will handle this via railway.json)
-# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-#   CMD wget --no-verbose --tries=1 --spider http://localhost:$PORT/health || exit 1
-
 # Start the backend server (which now also serves the frontend)
-CMD ["node", "server.js"]
+CMD ["./start-railway.sh"]
