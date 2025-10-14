@@ -7,18 +7,15 @@ FROM node:20-alpine AS frontend-builder
 # Set working directory
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY frontend/package*.json ./frontend/
-
-# Install frontend dependencies
-WORKDIR /app/frontend
-RUN npm ci
-
-# Copy all frontend source files
+# Copy all frontend files first
 COPY frontend/ ./
 
-# Verify files are present (debug step)
-RUN ls -la public/ && echo "Files in public directory:" && ls -la public/
+# Install frontend dependencies
+RUN npm ci
+
+# Verify files are present (debug step - remove in production)
+# RUN ls -la && echo "Files in current directory:" && ls -la
+# RUN ls -la public/ && echo "Files in public directory:" && ls -la public/
 
 # Build the frontend for production
 RUN npm run build
@@ -38,7 +35,7 @@ RUN npm ci --only=production
 COPY backend/ ./
 
 # Copy the built frontend from the previous stage
-COPY --from=frontend-builder /app/frontend/build ./public
+COPY --from=frontend-builder /app/build ./public
 
 # Copy Railway start script
 COPY start-railway.sh ./
