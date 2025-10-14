@@ -10,8 +10,10 @@ COPY frontend/package*.json ./
 # Install frontend dependencies
 RUN npm ci
 
-# Copy frontend source code
-COPY frontend/ ./
+# Copy all frontend source files (excluding node_modules)
+COPY frontend/public ./public
+COPY frontend/src ./src
+COPY frontend/README.md ./
 
 # Build the frontend for production
 RUN npm run build

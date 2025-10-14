@@ -178,22 +178,22 @@ function RoomRoute() {
     newSocket.emit('join-room', { roomId, userName, isObserver });
   };
 
-  const createRoom = async (roomName, creatorOnlyReveal = false) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/rooms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: roomName, creatorOnlyReveal }),
-      });
-      const data = await response.json();
-      return data.id;
-    } catch (error) {
-      console.error('Error creating room:', error);
-      throw error;
-    }
-  };
+  // const createRoom = async (roomName, creatorOnlyReveal = false) => {
+  //   try {
+  //     const response = await fetch(`${API_BASE_URL}/api/rooms`, {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ name: roomName, creatorOnlyReveal }),
+  //     });
+  //     const data = await response.json();
+  //     return data.id;
+  //   } catch (error) {
+  //     console.error('Error creating room:', error);
+  //     throw error;
+  //   }
+  // };
 
   const handleUserNameSubmit = (userName, isObserver = false) => {
     localStorage.setItem('userName', userName);
