@@ -14,7 +14,7 @@ COPY . .
 WORKDIR /app/frontend
 
 # Install frontend dependencies
-RUN npm ci
+RUN npm install --no-audit --no-fund
 
 # Build the frontend for production
 RUN npm run build
