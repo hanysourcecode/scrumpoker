@@ -30,11 +30,43 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
    git push origin main
    ```
 
-## 🚀 Step 2: Deploy to Railway
+## 🚀 Step 2: Deploy to Cloud Platform
 
-### Option A: Full-Stack Deployment (Recommended)
+Choose one of the following platforms:
 
-Deploy both frontend and backend together using the Docker container:
+### Option A: Deploy to Render (Recommended)
+
+Render offers excellent Docker support with a generous free tier:
+
+1. **Go to [render.com](https://render.com)**
+2. **Sign up with GitHub**
+3. **Click "New +" → "Web Service"**
+4. **Connect your GitHub repository**
+5. **Configure the Service**:
+   - **Name**: `scrum-poker-app`
+   - **Environment**: `Docker`
+   - **Dockerfile Path**: `Dockerfile.render`
+   - **Plan**: `Free`
+6. **Environment Variables**:
+   - `NODE_ENV=production`
+   - `PORT=10000`
+7. **Advanced Settings**:
+   - **Health Check Path**: `/health`
+   - **Auto-Deploy**: `Yes`
+8. **Deploy**: Render will build and deploy automatically
+9. **Get your app URL**: Render will provide a URL like `https://your-app-name.onrender.com`
+
+**Render Benefits:**
+- ✅ **Free Tier**: 15min sleep, 512MB RAM
+- ✅ **Docker Support**: Full Docker container support
+- ✅ **Auto-Deploy**: Automatic deployments on git push
+- ✅ **Health Monitoring**: Built-in health checks
+- ✅ **Custom Domains**: Easy custom domain setup
+- ✅ **WebSocket Support**: Full WebSocket support for Socket.io
+
+### Option B: Deploy to Railway
+
+Railway is another excellent platform for full-stack deployment:
 
 1. **Go to [Railway.app](https://railway.app)**
 2. **Sign up with GitHub**
