@@ -5,21 +5,19 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
 ## 📋 Prerequisites
 
 - GitHub account
-- Netlify account (free) or GitHub account
-- Railway account (free) or Render account (free)
+- Render account (free) or Docker Hub account
 
 ## 🎯 Deployment Strategy
 
-### Option 1: Hybrid Approach (Recommended)
-- **Frontend**: Netlify (React app - most reliable)
-- **Backend**: Railway (Node.js + Socket.IO)
+### Option 1: Full-Stack Deployment (Recommended)
+- **Frontend + Backend**: Render (Full-stack deployment with Docker)
 
-### Option 2: All-in-One Railway
-- **Frontend + Backend**: Railway (Full-stack deployment)
+### Option 2: Docker Hub Deployment
+- **Frontend + Backend**: Docker Hub (Universal deployment)
 
 ### Option 3: Separate Services
-- **Frontend**: GitHub Pages or Surge.sh (React app)
-- **Backend**: Railway or Render (Node.js + Socket.IO)
+- **Frontend**: Netlify, Vercel, or GitHub Pages (React app)
+- **Backend**: Render or Heroku (Node.js + Socket.IO)
 
 ## 🔧 Step 1: Prepare Repository
 
@@ -34,7 +32,23 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
 
 Choose one of the following deployment options:
 
-### Option 0: Deploy to Docker Hub (Universal)
+### Option 0: Automated CI/CD with GitHub Actions
+
+Use GitHub Actions to automatically build and publish Docker images:
+
+**Features:**
+- ✅ **Automatic Builds**: Triggers on push, PR, and tags
+- ✅ **Multi-Platform**: Supports linux/amd64 and linux/arm64
+- ✅ **Security Scanning**: Vulnerability scanning with Trivy
+- ✅ **Version Management**: Automatic tagging based on git tags
+- ✅ **GHCR Integration**: Publishes to GitHub Container Registry
+
+**Setup:**
+1. Push your code to GitHub
+2. Workflows automatically trigger
+3. Images published to `ghcr.io/your-username/scrum-poker`
+
+### Option 1: Manual Docker Hub Deployment
 
 Push your app to Docker Hub for universal deployment:
 
@@ -52,7 +66,7 @@ Push your app to Docker Hub for universal deployment:
 - ✅ **Easy Sharing**: Share your app with others
 - ✅ **CI/CD Ready**: Integrate with automated pipelines
 
-### Option 1: Deploy to Cloud Platforms
+### Option 2: Deploy to Cloud Platforms
 
 Choose one of the following platforms:
 
@@ -86,31 +100,12 @@ Render offers excellent Docker support with a generous free tier:
 - ✅ **Custom Domains**: Easy custom domain setup
 - ✅ **WebSocket Support**: Full WebSocket support for Socket.io
 
-### Option B: Deploy to Railway
-
-Railway is another excellent platform for full-stack deployment:
-
-1. **Go to [Railway.app](https://railway.app)**
-2. **Sign up with GitHub**
-3. **Click "New Project" → "Deploy from GitHub repo"**
-4. **Select your repository**
-5. **Railway will automatically detect the Dockerfile**
-6. **Configure Environment Variables**:
-   - `NODE_ENV=production`
-   - `PORT=5000` (Railway will set this automatically)
-7. **Deploy**: Railway will build and deploy automatically
-8. **Get your app URL**: Railway will provide a URL like `https://your-app-name.railway.app`
-
-**Benefits of this approach:**
-- ✅ Single deployment
-- ✅ No CORS issues
-- ✅ Automatic HTTPS
 - ✅ Custom domain support
 - ✅ Built-in monitoring
 
 ### Option B: Backend Only (For separate frontend deployment)
 
-1. **Go to [Railway.app](https://railway.app)**
+1. **Go to [render.com](https://render.com)**
 2. **Sign up with GitHub**
 3. **Click "New Project" → "Deploy from GitHub repo"**
 4. **Select your repository**
@@ -123,7 +118,7 @@ Railway is another excellent platform for full-stack deployment:
      - `PORT=5000`
    
 6. **Get Backend URL**:
-   - Copy the backend URL (e.g., `https://scrumpoker-production-xxxx.up.railway.app`)
+   - Copy the backend URL (e.g., `https://scrumpoker-production-xxxx.up.render.com`)
    - You'll need this for the frontend configuration
 
 ## 🌐 Step 3: Deploy Frontend to Netlify
@@ -137,14 +132,14 @@ Railway is another excellent platform for full-stack deployment:
    - **Build command**: `cd frontend && npm install && npm run build` (or leave empty if using netlify.toml)
    - **Publish directory**: `frontend/build` (or leave empty if using netlify.toml)
 6. **Add Environment Variables**:
-   - `REACT_APP_API_URL` = `https://your-backend-url.railway.app`
+   - `REACT_APP_API_URL` = `https://your-backend-url.render.com`
 7. **Click "Deploy site"**
 
 ### Option B: Separate Backend Deployment
 
 If you prefer to deploy backend separately:
 
-1. **Go to [Railway.app](https://railway.app)**
+1. **Go to [render.com](https://render.com)**
 2. **Sign up with GitHub**
 3. **Click "New Project" → "Deploy from GitHub repo"**
 4. **Select your repository**
@@ -169,7 +164,7 @@ If you prefer to deploy backend separately:
    - **Build command**: `npm run build`
    - **Publish directory**: `frontend/build`
 6. **Add Environment Variables**:
-   - `REACT_APP_API_URL=https://your-backend-url.railway.app` (or .render.com)
+   - `REACT_APP_API_URL=https://your-backend-url.render.com` (or .render.com)
 7. **Click "Deploy site"**
 
 ### Option B: GitHub Pages
@@ -210,7 +205,7 @@ If you prefer to deploy backend separately:
    ```
 5. **Add secret**: Go to Settings → Secrets → Actions → New repository secret
    - Name: `REACT_APP_API_URL`
-   - Value: `https://your-backend-url.railway.app`
+   - Value: `https://your-backend-url.render.com`
 
 ### Option C: Surge.sh
 
@@ -219,7 +214,7 @@ If you prefer to deploy backend separately:
 3. **Deploy**: `surge build/ your-app-name.surge.sh`
 4. **Set environment variable**: Create `frontend/.env.production`:
    ```
-   REACT_APP_API_URL=https://your-backend-url.railway.app
+   REACT_APP_API_URL=https://your-backend-url.render.com
    ```
 
 ## 🔄 Step 4: Update URLs
@@ -261,11 +256,11 @@ After both deployments:
    - Make sure all environment variables are set
    - Redeploy after changing environment variables
 
-4. **Railway Build Issues**:
-   - If you get "Script start.sh not found" error, Railway will now use package.json scripts
+4. **Render Build Issues**:
+   - If you get "Script start.sh not found" error, Render will now use package.json scripts
    - If Railpack can't determine how to build, package.json provides explicit scripts
    - Make sure PORT environment variable is set correctly
-   - Package.json approach is Railway's most reliable method
+   - Package.json approach is Render's most reliable method
 
 5. **Netlify Build Issues**:
    - If you get "No url found for submodule" error, use the netlify.toml configuration
@@ -292,7 +287,7 @@ After both deployments:
 - ✅ Custom domains
 - ✅ Simple command-line deployment
 
-### Railway:
+### Render:
 - ✅ $5 credit monthly (usually enough for small apps)
 - ✅ Automatic deployments
 - ✅ Custom domains
@@ -308,22 +303,22 @@ Your Scrum Poker app should now be live and accessible to anyone on the internet
 
 **Example URLs**:
 - Frontend: `https://scrum-poker-app.netlify.app` or `https://username.github.io/scrum-poker`
-- Backend: `https://scrum-poker-backend.railway.app`
+- Backend: `https://scrum-poker-backend.render.com`
 
 ## 💰 Cost Breakdown
 
 ### Option 1: Hybrid Approach (Recommended)
 - **Netlify**: $0/month (completely free)
-- **Railway**: $0/month (free $5 credit)
+- **Render**: $0/month (free $5 credit)
 - **Total**: **Completely free!**
 
-### Option 2: All-in-One Railway
-- **Railway**: $0/month (free $5 credit covers both services)
+### Option 2: All-in-One Render
+- **Render**: $0/month (free $5 credit covers both services)
 - **Total**: **Completely free!**
 
 ### Option 3: Separate Services
 - **Frontend**: $0/month (GitHub Pages/Surge.sh)
-- **Backend**: $0/month (Railway free credit)
+- **Backend**: $0/month (Render free credit)
 - **Total**: **Completely free!**
 
 ## 🔄 Updates

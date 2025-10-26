@@ -62,9 +62,6 @@ docker build -f Dockerfile -t yourusername/scrum-poker:latest .
 # For Render deployment
 docker build -f Dockerfile.render -t yourusername/scrum-poker:render .
 
-# For Railway deployment
-docker build -f Dockerfile.railway -t yourusername/scrum-poker:railway .
-
 # For alternative Render deployment
 docker build -f Dockerfile.render.alternative -t yourusername/scrum-poker:render-alt .
 ```
@@ -87,7 +84,6 @@ docker push yourusername/scrum-poker:v1.0.0
 | `Dockerfile` | Main Dockerfile | General deployment |
 | `Dockerfile.render` | Render optimized | Render.com deployment |
 | `Dockerfile.render.alternative` | Render alternative | Render fallback |
-| `Dockerfile.railway` | Railway optimized | Railway.app deployment |
 
 ## Deployment Options
 
@@ -96,7 +92,6 @@ docker push yourusername/scrum-poker:v1.0.0
 Once your image is on Docker Hub, you can deploy it to:
 
 - **Render**: Use Docker deployment with your image
-- **Railway**: Use Docker deployment with your image
 - **Heroku**: Use Docker deployment with your image
 - **AWS ECS**: Use your Docker Hub image
 - **Google Cloud Run**: Use your Docker Hub image

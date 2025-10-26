@@ -54,7 +54,6 @@ show_usage() {
     echo "  - Dockerfile (main)"
     echo "  - Dockerfile.render (Render optimized)"
     echo "  - Dockerfile.render.alternative (Render alternative)"
-    echo "  - Dockerfile.railway (Railway optimized)"
 }
 
 # Parse command line arguments

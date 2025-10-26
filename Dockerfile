@@ -11,10 +11,10 @@ COPY . .
 WORKDIR /app/frontend
 
 # Install frontend dependencies
-RUN npm ci
+RUN npm install --no-audit --no-fund
 
 # Build the frontend for production
-RUN npm run build
+RUN npx react-scripts build
 
 # Stage 2: Build the backend and serve both frontend and backend
 FROM node:20-alpine AS production
@@ -33,14 +33,14 @@ COPY backend/ ./
 # Copy the built frontend from the previous stage
 COPY --from=frontend-builder /app/frontend/build ./public
 
-# Copy Railway start script
-COPY start-railway.sh ./
-RUN chmod +x start-railway.sh
+# Copy start script
+COPY start-render.sh ./
+RUN chmod +x start-render.sh
 
-# Expose port (Railway will set PORT environment variable)
+# Expose port (will be set by deployment platform)
 EXPOSE $PORT
 
-# Health check (Railway will handle this via railway.json)
+# Health check
 # HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 #   CMD wget --no-verbose --tries=1 --spider http://localhost:$PORT/health || exit 1
 

@@ -1,0 +1,189 @@
+name: Multi-Platform Docker Build and Push
+
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      dockerfile:
+        description: 'Dockerfile to build'
+        required: true
+        default: 'Dockerfile'
+        type: choice
+        options:
+        - Dockerfile
+        - Dockerfile.render
+        - Dockerfile.render.alternative
+      push:
+        description: 'Push to registry'
+        required: true
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        dockerfile: 
+          - Dockerfile
+          - Dockerfile.render
+          - Dockerfile.render.alternative
+        include:
+          - dockerfile: Dockerfile
+            suffix: ""
+          - dockerfile: Dockerfile.render
+            suffix: "-render"
+          - dockerfile: Dockerfile.render.alternative
+            suffix: "-render-alt"
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      if: ${{ github.event.inputs.push != 'false' }}
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ matrix.suffix }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value=${{ matrix.suffix }},enable={{is_default_branch}}
+
+    - name: Build Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ./${{ matrix.dockerfile }}
+        push: ${{ github.event.inputs.push != 'false' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+        outputs: type=registry
+
+    - name: Generate artifact attestation
+      if: ${{ github.event.inputs.push != 'false' }}
+      uses: actions/attest-build-provenance@v1
+      with:
+        subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ matrix.suffix }}
+        subject-digest: ${{ steps.build.outputs.digest }}
+        push-to-registry: true
+
+    - name: Upload build artifacts
+      if: ${{ github.event.inputs.push == 'false' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: docker-image-${{ matrix.suffix }}
+        path: /tmp/.buildx-cache
+
+  security-scan:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    strategy:
+      matrix:
+        suffix: ["", "-render", "-render-alt"]
+    
+    steps:
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}${{ matrix.suffix }}:latest
+        format: 'sarif'
+        output: 'trivy-results-${{ matrix.suffix }}.sarif'
+
+    - name: Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results-${{ matrix.suffix }}.sarif'
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [build, security-scan]
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: Release ${{ github.ref }}
+        body: |
+          ## Docker Images Released
+          
+          The following Docker images have been built and pushed to GHCR:
+          
+          - `ghcr.io/${{ github.repository }}:latest`
+          - `ghcr.io/${{ github.repository }}-render:latest`
+          - `ghcr.io/${{ github.repository }}-render-alt:latest`
+          
+          ### Usage
+          
+          ```bash
+          # Pull the latest image
+          docker pull ghcr.io/${{ github.repository }}:latest
+          
+          # Run the application
+          docker run -p 5000:5000 -e PORT=5000 ghcr.io/${{ github.repository }}:latest
+          ```
+          
+          ### Security
+          
+          All images have been scanned for vulnerabilities using Trivy.
+        draft: false
+        prerelease: false
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [build, security-scan]
+    if: always()
+    
+    steps:
+    - name: Notify deployment status
+      run: |
+        if [ "${{ needs.build.result }}" == "success" ]; then
+          echo "✅ Docker images successfully built and pushed to GHCR"
+          echo "📦 Images:"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-render:latest"
+          echo "  - ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-render-alt:latest"
+        else
+          echo "❌ Docker build/push failed"
+          exit 1
+        fi
