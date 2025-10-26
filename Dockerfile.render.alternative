@@ -1,20 +1,27 @@
-# Render-optimized Dockerfile for Scrum Poker App
-# This version is specifically designed to work reliably on Render
+# Alternative Render Dockerfile - More explicit file copying
+# Use this if the main Dockerfile.render still has issues on Render
 
 # Stage 1: Build the frontend React app
 FROM node:20-alpine AS frontend-builder
 
 # Set working directory
-WORKDIR /app
-
-# Copy entire project structure first
-COPY . .
-
-# Change to frontend directory
 WORKDIR /app/frontend
+
+# Copy frontend package files first for better caching
+COPY frontend/package*.json ./
 
 # Install frontend dependencies
 RUN npm ci
+
+# Copy frontend public directory (required for build)
+COPY frontend/public ./public
+
+# Copy frontend source directory
+COPY frontend/src ./src
+
+# Copy other frontend files
+COPY frontend/README.md ./
+COPY frontend/.gitignore ./
 
 # Build the frontend for production
 RUN npm run build

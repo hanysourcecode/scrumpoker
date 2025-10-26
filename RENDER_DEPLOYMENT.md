@@ -42,7 +42,7 @@ Render supports Docker deployments, which is perfect for our multi-stage Dockerf
 3. **Configure the Service**:
    - **Name**: `scrum-poker-app` (or your preferred name)
    - **Environment**: `Docker`
-   - **Dockerfile Path**: `Dockerfile.render`
+   - **Dockerfile Path**: `Dockerfile.render` (or `Dockerfile.render.alternative` if you encounter build issues)
    - **Plan**: `Free` (or upgrade as needed)
 
 4. **Environment Variables**:
@@ -181,19 +181,32 @@ Your app includes a health check endpoint at `/health` that returns:
 
 ### Common Issues:
 
-1. **Build Failures**:
+1. **Build Failures - "Could not find a required file. Name: index.html"**:
+   - **Solution 1**: Use `Dockerfile.render.alternative` instead of `Dockerfile.render`
+   - **Solution 2**: Ensure all files are committed to your repository
+   - **Solution 3**: Check that the `frontend/public/index.html` file exists
+
+2. **Build Failures - General**:
    - Check Dockerfile path is correct
    - Verify all files are committed
    - Check build logs for specific errors
 
-2. **Health Check Failures**:
+3. **Health Check Failures**:
    - Ensure `/health` endpoint is working
    - Check if server is starting correctly
    - Verify PORT environment variable
 
-3. **Socket.io Issues**:
+4. **Socket.io Issues**:
    - Render handles WebSocket connections well
    - No additional configuration needed
+
+### Alternative Dockerfiles:
+
+If you encounter build issues, try these alternative approaches:
+
+1. **Dockerfile.render.alternative**: More explicit file copying
+2. **Dockerfile.railway**: Railway-optimized version (may work on Render)
+3. **Dockerfile**: Main Dockerfile (fallback option)
 
 ### Debug Steps:
 
