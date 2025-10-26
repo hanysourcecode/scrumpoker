@@ -8,19 +8,97 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: process.env.NODE_ENV === 'production' ? 
-      [
-        process.env.FRONTEND_URL, 
-        "https://scrum-poker-app.netlify.app",
-        "https://*.github.io",
-        "https://*.surge.sh"
-      ] : 
-      "http://localhost:3000",
-    methods: ["GET", "POST"]
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // In production, allow various domains
+      if (process.env.NODE_ENV === 'production') {
+        const allowedOrigins = [
+          process.env.FRONTEND_URL,
+          "https://scrum-poker-app.netlify.app",
+          "https://*.github.io",
+          "https://*.surge.sh",
+          "https://*.onrender.com",
+          "https://*.railway.app",
+          "https://*.herokuapp.com"
+        ];
+        
+        // Check if origin matches any allowed pattern
+        const isAllowed = allowedOrigins.some(allowedOrigin => {
+          if (allowedOrigin.includes('*')) {
+            const pattern = allowedOrigin.replace('*', '.*');
+            return new RegExp(pattern).test(origin);
+          }
+          return allowedOrigin === origin;
+        });
+        
+        if (isAllowed) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      } else {
+        // In development, allow localhost
+        const allowedOrigins = ["http://localhost:3000", "http://localhost:5000"];
+        if (allowedOrigins.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      }
+    },
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
-app.use(cors());
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // In production, allow various domains
+    if (process.env.NODE_ENV === 'production') {
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        "https://scrum-poker-app.netlify.app",
+        "https://*.github.io",
+        "https://*.surge.sh",
+        "https://*.onrender.com",
+        "https://*.railway.app",
+        "https://*.herokuapp.com"
+      ];
+      
+      // Check if origin matches any allowed pattern
+      const isAllowed = allowedOrigins.some(allowedOrigin => {
+        if (allowedOrigin.includes('*')) {
+          const pattern = allowedOrigin.replace('*', '.*');
+          return new RegExp(pattern).test(origin);
+        }
+        return allowedOrigin === origin;
+      });
+      
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    } else {
+      // In development, allow localhost
+      const allowedOrigins = ["http://localhost:3000", "http://localhost:5000"];
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Serve static files from the React app build directory

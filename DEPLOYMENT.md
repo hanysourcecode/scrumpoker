@@ -32,6 +32,28 @@ This guide will help you deploy the Scrum Poker application to free hosting serv
 
 ## 🚀 Step 2: Deploy to Cloud Platform
 
+Choose one of the following deployment options:
+
+### Option 0: Deploy to Docker Hub (Universal)
+
+Push your app to Docker Hub for universal deployment:
+
+```bash
+# Quick deployment
+./dockerhub-push.sh yourusername
+
+# Full deployment with options
+./push-to-dockerhub.sh -u yourusername -t v1.0.0 -f Dockerfile.render
+```
+
+**Benefits:**
+- ✅ **Universal**: Deploy anywhere Docker is supported
+- ✅ **Version Control**: Tag and manage different versions
+- ✅ **Easy Sharing**: Share your app with others
+- ✅ **CI/CD Ready**: Integrate with automated pipelines
+
+### Option 1: Deploy to Cloud Platforms
+
 Choose one of the following platforms:
 
 ### Option A: Deploy to Render (Recommended)

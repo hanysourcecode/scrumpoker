@@ -7,7 +7,7 @@ import UserNamePrompt from './components/UserNamePrompt';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import { io } from 'socket.io-client';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
 
 // Component for handling room routes
 function RoomRoute() {
