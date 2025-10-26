@@ -12,32 +12,17 @@ const io = socketIo(server, {
       // Allow requests with no origin (like mobile apps or curl requests)
       if (!origin) return callback(null, true);
       
-      // In production, allow various domains
+      // In production, be more permissive
       if (process.env.NODE_ENV === 'production') {
-        const allowedOrigins = [
-          process.env.FRONTEND_URL,
-          "https://scrum-poker-app.netlify.app",
-          "https://*.github.io",
-          "https://*.surge.sh",
-          "https://*.onrender.com",
-          "https://*.railway.app",
-          "https://*.herokuapp.com"
-        ];
-        
-        // Check if origin matches any allowed pattern
-        const isAllowed = allowedOrigins.some(allowedOrigin => {
-          if (allowedOrigin.includes('*')) {
-            const pattern = allowedOrigin.replace('*', '.*');
-            return new RegExp(pattern).test(origin);
-          }
-          return allowedOrigin === origin;
-        });
-        
-        if (isAllowed) {
-          callback(null, true);
-        } else {
-          callback(new Error('Not allowed by CORS'));
+        // Allow all HTTPS origins for production
+        if (origin.startsWith('https://')) {
+          return callback(null, true);
         }
+        // Allow HTTP for local development even in production mode
+        if (origin.startsWith('http://localhost')) {
+          return callback(null, true);
+        }
+        callback(new Error('Not allowed by CORS'));
       } else {
         // In development, allow localhost
         const allowedOrigins = ["http://localhost:3000", "http://localhost:5000"];
@@ -59,32 +44,17 @@ const corsOptions = {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // In production, allow various domains
+    // In production, be more permissive
     if (process.env.NODE_ENV === 'production') {
-      const allowedOrigins = [
-        process.env.FRONTEND_URL,
-        "https://scrum-poker-app.netlify.app",
-        "https://*.github.io",
-        "https://*.surge.sh",
-        "https://*.onrender.com",
-        "https://*.railway.app",
-        "https://*.herokuapp.com"
-      ];
-      
-      // Check if origin matches any allowed pattern
-      const isAllowed = allowedOrigins.some(allowedOrigin => {
-        if (allowedOrigin.includes('*')) {
-          const pattern = allowedOrigin.replace('*', '.*');
-          return new RegExp(pattern).test(origin);
-        }
-        return allowedOrigin === origin;
-      });
-      
-      if (isAllowed) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
+      // Allow all HTTPS origins for production
+      if (origin.startsWith('https://')) {
+        return callback(null, true);
       }
+      // Allow HTTP for local development even in production mode
+      if (origin.startsWith('http://localhost')) {
+        return callback(null, true);
+      }
+      callback(new Error('Not allowed by CORS'));
     } else {
       // In development, allow localhost
       const allowedOrigins = ["http://localhost:3000", "http://localhost:5000"];
