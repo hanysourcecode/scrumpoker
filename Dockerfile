@@ -34,8 +34,8 @@ COPY backend/ ./
 COPY --from=frontend-builder /app/frontend/build ./public
 
 # Copy start script
-COPY start-render.sh ./
-RUN chmod +x start-render.sh
+COPY start-server.sh ./
+RUN chmod +x start-server.sh
 
 # Expose port (will be set by deployment platform)
 EXPOSE $PORT
