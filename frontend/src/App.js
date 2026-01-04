@@ -5,15 +5,25 @@ import HomePage from './components/HomePage';
 import GameRoom from './components/GameRoom';
 import UserNamePrompt from './components/UserNamePrompt';
 import { DarkModeProvider } from './contexts/DarkModeContext';
-import { io } from 'socket.io-client';
+import RealTimeService from './services/realtimeService';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:5000');
+
+// Generate or retrieve userId from localStorage
+const getUserId = () => {
+  let userId = localStorage.getItem('scrumPokerUserId');
+  if (!userId) {
+    userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('scrumPokerUserId', userId);
+  }
+  return userId;
+};
 
 // Component for handling room routes
 function RoomRoute() {
   const { roomId } = useParams();
   const navigate = useNavigate();
-  const [socket, setSocket] = useState(null);
+  const [realtimeService, setRealtimeService] = useState(null);
   const [room, setRoom] = useState(null);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -22,13 +32,13 @@ function RoomRoute() {
 
   useEffect(() => {
     return () => {
-      if (socket) {
-        socket.disconnect();
+      if (realtimeService) {
+        realtimeService.disconnect();
       }
       // Reset the ref when component unmounts
       hasJoinedRef.current = false;
     };
-  }, [socket]);
+  }, [realtimeService]);
 
   // Handle direct access to room URL
   useEffect(() => {
@@ -40,142 +50,149 @@ function RoomRoute() {
     }
   }, [roomId, navigate]);
 
-  const joinRoom = (roomId, userName, isObserver = false) => {
+  const joinRoom = async (roomId, userName, isObserver = false) => {
     console.log('Attempting to join room:', roomId, 'with user:', userName, 'as observer:', isObserver);
-    const newSocket = io(API_BASE_URL);
+    const userId = getUserId();
+    const service = new RealTimeService();
     
-    newSocket.on('connect', () => {
-      console.log('Socket connected successfully');
-    });
+    try {
+      const data = await service.connect(userId, roomId, userName, isObserver);
+      
+      // Handle pending join request
+      if (data.pending) {
+        setIsLoading(false);
+        setRoom({
+          joinRequestPending: true,
+          joinRequestMessage: data.message
+        });
+        setRealtimeService(service);
+        return;
+      }
 
-    newSocket.on('disconnect', () => {
-      console.log('Socket disconnected');
-    });
+      // Set up event handlers
+      service.on('joined-room', (data) => {
+        console.log('Successfully joined room:', data);
+        setRoom(data.room);
+        setUser(data.user);
+        setIsLoading(false);
+      });
 
-    newSocket.on('joined-room', (data) => {
-      console.log('Successfully joined room:', data);
-      setRoom(data.room);
-      setUser(data.user);
+      service.on('error', (error) => {
+        console.error('Real-time error:', error);
+        alert(error.message);
+      });
+
+      service.on('user-joined', (data) => {
+        setRoom(prev => ({
+          ...prev,
+          users: data.users,
+          voteCount: data.voteCount,
+          participantCount: data.participantCount
+        }));
+      });
+
+      service.on('user-left', (data) => {
+        setRoom(prev => ({
+          ...prev,
+          users: data.users,
+          voteCount: data.voteCount,
+          participantCount: data.participantCount
+        }));
+      });
+
+      service.on('room-updated', (data) => {
+        setRoom(data.room);
+      });
+
+      service.on('votes-revealed', (data) => {
+        setRoom(prev => ({
+          ...prev,
+          showVotes: true,
+          votes: data.votes,
+          averageVote: data.averageVote,
+          voteCount: data.voteCount,
+          participantCount: data.participantCount
+        }));
+      });
+
+      service.on('votes-reset', () => {
+        setRoom(prev => ({
+          ...prev,
+          showVotes: false,
+          votes: {},
+          averageVote: null,
+          voteCount: 0
+        }));
+      });
+
+      service.on('story-updated', (data) => {
+        setRoom(prev => ({
+          ...prev,
+          currentStory: data.story
+        }));
+      });
+
+      service.on('user-updated', (data) => {
+        setRoom(prev => ({
+          ...prev,
+          users: data.users,
+          voteCount: data.voteCount,
+          participantCount: data.participantCount
+        }));
+      });
+
+      service.on('join-request', (data) => {
+        setRoom(prev => ({
+          ...prev,
+          joinRequests: [...(prev.joinRequests || []), data.user]
+        }));
+      });
+
+      service.on('join-request-pending', (data) => {
+        setIsLoading(false);
+        setRoom(prev => ({
+          ...prev,
+          joinRequestPending: true,
+          joinRequestMessage: data.message
+        }));
+      });
+
+      service.on('join-request-approved', (data) => {
+        setRoom(data.room);
+        setUser(data.user);
+        setIsLoading(false);
+      });
+
+      service.on('join-request-rejected', (data) => {
+        alert(data.message);
+        navigate('/');
+      });
+
+      service.on('join-requests-updated', (data) => {
+        setRoom(prev => ({
+          ...prev,
+          joinRequests: data.joinRequests
+        }));
+      });
+
+      service.on('session-ended', (data) => {
+        alert(data.message);
+        navigate('/');
+      });
+
+      setRealtimeService(service);
+      
+      // If data was returned directly (Pusher), set it immediately
+      if (data.room && data.user) {
+        setRoom(data.room);
+        setUser(data.user);
+        setIsLoading(false);
+      }
+    } catch (error) {
+      console.error('Error joining room:', error);
+      alert(error.message || 'Failed to join room');
       setIsLoading(false);
-    });
-
-    newSocket.on('error', (error) => {
-      console.error('Socket error:', error);
-      alert(error.message);
-    });
-
-    newSocket.on('user-joined', (data) => {
-      setRoom(prev => ({
-        ...prev,
-        users: data.users,
-        voteCount: data.voteCount,
-        participantCount: data.participantCount
-      }));
-    });
-
-    newSocket.on('user-left', (data) => {
-      setRoom(prev => ({
-        ...prev,
-        users: data.users,
-        voteCount: data.voteCount,
-        participantCount: data.participantCount
-      }));
-    });
-
-    newSocket.on('vote-cast', (data) => {
-      // Handle vote cast notification
-    });
-
-    newSocket.on('room-updated', (data) => {
-      setRoom(data.room);
-    });
-
-    newSocket.on('votes-revealed', (data) => {
-      setRoom(prev => ({
-        ...prev,
-        showVotes: true,
-        votes: data.votes,
-        averageVote: data.averageVote,
-        voteCount: data.voteCount,
-        participantCount: data.participantCount
-      }));
-    });
-
-    newSocket.on('votes-reset', () => {
-      setRoom(prev => ({
-        ...prev,
-        showVotes: false,
-        votes: {},
-        averageVote: null,
-        voteCount: 0
-      }));
-    });
-
-
-    newSocket.on('story-updated', (data) => {
-      setRoom(prev => ({
-        ...prev,
-        currentStory: data.story
-      }));
-    });
-
-    newSocket.on('user-updated', (data) => {
-      setRoom(prev => ({
-        ...prev,
-        users: data.users,
-        voteCount: data.voteCount,
-        participantCount: data.participantCount
-      }));
-    });
-
-    newSocket.on('join-request', (data) => {
-      setRoom(prev => ({
-        ...prev,
-        joinRequests: [...(prev.joinRequests || []), data.user]
-      }));
-    });
-
-    newSocket.on('join-request-pending', (data) => {
-      // Don't show alert, just update the loading message
-      setIsLoading(false);
-      setRoom(prev => ({
-        ...prev,
-        joinRequestPending: true,
-        joinRequestMessage: data.message
-      }));
-    });
-
-    newSocket.on('join-request-approved', (data) => {
-      // Set room and user data from the approval response
-      setRoom(prev => ({
-        ...data.room,
-        joinRequestPending: false,
-        joinRequestMessage: null
-      }));
-      setUser(data.user);
-      setIsLoading(false);
-    });
-
-    newSocket.on('join-request-rejected', (data) => {
-      alert(data.message);
-      navigate('/');
-    });
-
-    newSocket.on('join-requests-updated', (data) => {
-      setRoom(prev => ({
-        ...prev,
-        joinRequests: data.joinRequests
-      }));
-    });
-
-    newSocket.on('session-ended', (data) => {
-      alert(data.message);
-      navigate('/');
-    });
-
-    setSocket(newSocket);
-    console.log('Emitting join-room event with:', { roomId, userName, isObserver });
-    newSocket.emit('join-room', { roomId, userName, isObserver });
+    }
   };
 
   // const createRoom = async (roomName, creatorOnlyReveal = false) => {
@@ -207,9 +224,9 @@ function RoomRoute() {
   };
 
   const leaveRoom = () => {
-    if (socket) {
-      socket.disconnect();
-      setSocket(null);
+    if (realtimeService) {
+      realtimeService.disconnect();
+      setRealtimeService(null);
     }
     setRoom(null);
     setUser(null);
@@ -248,7 +265,7 @@ function RoomRoute() {
     <GameRoom
       room={room}
       user={user}
-      socket={socket}
+      realtimeService={realtimeService}
       onLeaveRoom={leaveRoom}
     />
   );

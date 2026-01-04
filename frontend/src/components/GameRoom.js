@@ -3,7 +3,7 @@ import DarkModeToggle from './DarkModeToggle';
 
 const FIBONACCI_SEQUENCE = [0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, '?'];
 
-const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
+const GameRoom = ({ room, user, realtimeService, onLeaveRoom }) => {
   const [selectedVote, setSelectedVote] = useState(null);
   const [isObserver, setIsObserver] = useState(user?.isObserver || false);
   const [showNewStoryPopup, setShowNewStoryPopup] = useState(false);
@@ -34,14 +34,16 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
   }, [room?.votes, user?.name, room?.showVotes, selectedVote]);
 
   const handleVote = (vote) => {
-    if (isObserver || room?.showVotes) return;
+    if (isObserver || room?.showVotes || !realtimeService) return;
     
     setSelectedVote(vote);
-    socket.emit('cast-vote', { vote });
+    realtimeService.emit('cast-vote', { vote });
   };
 
   const handleRevealVotes = () => {
-    socket.emit('reveal-votes');
+    if (realtimeService) {
+      realtimeService.emit('reveal-votes');
+    }
   };
 
   const handleResetVotes = () => {
@@ -50,17 +52,21 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
 
   const handleVoteAgain = () => {
     // Reset votes without changing the story
-    socket.emit('reset-votes');
+    if (realtimeService) {
+      realtimeService.emit('reset-votes');
+    }
     setSelectedVote(null);
   };
 
   const handleNewStorySubmit = () => {
-    if (newStoryName.trim()) {
-      // Set the new story first
-      socket.emit('set-story', { story: newStoryName.trim() });
+    if (realtimeService) {
+      if (newStoryName.trim()) {
+        // Set the new story first
+        realtimeService.emit('set-story', { story: newStoryName.trim() });
+      }
+      // Reset votes
+      realtimeService.emit('reset-votes');
     }
-    // Reset votes
-    socket.emit('reset-votes');
     setSelectedVote(null);
     setShowNewStoryPopup(false);
     setNewStoryName('');
@@ -140,23 +146,27 @@ const GameRoom = ({ room, user, socket, onLeaveRoom }) => {
   // };
 
   const handleApproveJoinRequest = (userId) => {
-    socket.emit('approve-join-request', { userId });
+    if (realtimeService) {
+      realtimeService.emit('approve-join-request', { userId });
+    }
   };
 
   const handleRejectJoinRequest = (userId) => {
-    socket.emit('reject-join-request', { userId });
+    if (realtimeService) {
+      realtimeService.emit('reject-join-request', { userId });
+    }
   };
 
   const handleRemoveVote = () => {
-    if (socket) {
-      socket.emit('remove-vote');
+    if (realtimeService) {
+      realtimeService.emit('remove-vote');
     }
   };
 
   const handleEndSession = () => {
-    if (socket && user?.id === room?.creatorId) {
+    if (realtimeService && user?.id === room?.creatorId) {
       if (window.confirm('Are you sure you want to end the session? This will disconnect all users from the room.')) {
-        socket.emit('end-session');
+        realtimeService.emit('end-session');
       }
     }
   };
